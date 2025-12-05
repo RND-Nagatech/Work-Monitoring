@@ -35,6 +35,24 @@ const startServer = async (): Promise<void> => {
       console.warn('Task kode_divisi migration skipped:', migErr);
     }
 
+    // Migration: convert tanggal_input from Date to YYYY-MM-DD string
+    try {
+      const tasksWithDateInput = await Task.find({ tanggal_input: { $type: 'date' } });
+      let dateMigrated = 0;
+      for (const t of tasksWithDateInput) {
+        if (t.tanggal_input instanceof Date) {
+          (t as any).tanggal_input = t.tanggal_input.toISOString().split('T')[0];
+          await t.save();
+          dateMigrated++;
+        }
+      }
+      if (dateMigrated) {
+        console.log(`Migrated ${dateMigrated} task(s) tanggal_input to YYYY-MM-DD string format.`);
+      }
+    } catch (dateMigErr) {
+      console.warn('Task tanggal_input migration skipped:', dateMigErr);
+    }
+
     // Hardcode default admin user
     const { default: User } = await import('./models/User');
     const admin = await User.findOne({ username: 'admin' });

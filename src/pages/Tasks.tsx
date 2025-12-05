@@ -274,7 +274,7 @@ export default function Tasks() {
 
   const openEditDialog = (task: Task) => {
     setFormData({
-      kode_pekerjaan: task.kode_pekerjaan,
+      kode_pekerjaan: task.kode_pekerjaan.toUpperCase(),
       deskripsi: task.deskripsi,
       divisionId: task.divisionId,
       poin: task.poin,
@@ -442,8 +442,9 @@ export default function Tasks() {
               <Label>Task Code *</Label>
               <Input
                 value={formData.kode_pekerjaan}
-                onChange={(e) => setFormData({ ...formData, kode_pekerjaan: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, kode_pekerjaan: e.target.value.toUpperCase() })}
                 placeholder="e.g., TSK-007"
+                disabled={!!editDialog.task}
               />
             </div>
             <div className="space-y-2">

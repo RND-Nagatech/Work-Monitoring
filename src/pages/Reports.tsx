@@ -490,6 +490,13 @@ export default function Reports() {
             </Select>
           </div>
         </div>
+
+        <div className="flex justify-end mt-4">
+          <Button variant="brand" className="rounded-full" onClick={handleSearch}>
+            <FileText className="w-4 h-4 mr-2" />
+            Cari Data
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

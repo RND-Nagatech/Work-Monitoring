@@ -20,10 +20,10 @@ export const getReport = async (
     if (start || end) {
       queryFilter.tanggal_input = {};
       if (start) {
-        queryFilter.tanggal_input.$gte = new Date(start as string);
+        queryFilter.tanggal_input.$gte = start;
       }
       if (end) {
-        queryFilter.tanggal_input.$lte = new Date(end as string);
+        queryFilter.tanggal_input.$lte = end;
       }
     }
 

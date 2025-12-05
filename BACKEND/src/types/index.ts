@@ -32,7 +32,7 @@ export interface ITask extends Document {
   status_pekerjaan: 'OPEN' | 'ON PROGRESS' | 'DONE';
   poin: number;
   pic?: Types.ObjectId | null;
-  tanggal_input: Date;
+  tanggal_input: string;
   deadline: Date;
   createdAt: Date;
   updatedAt: Date;

@@ -201,7 +201,7 @@ export default function MasterEmployee() {
     }
   };
   const openEditDialog = (employee: Employee) => {
-    setFormData({ nip: employee.nip, nama: employee.nama, divisionId: employee.divisionId });
+    setFormData({ nip: employee.nip, nama: employee.nama.toUpperCase(), divisionId: employee.divisionId });
     setEditDialog({ open: true, employee });
   };
 
@@ -284,11 +284,11 @@ export default function MasterEmployee() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Kode Pegawai</Label>
-                <Input value={formData.nip} onChange={(e) => setFormData({ ...formData, nip: e.target.value })} placeholder="e.g., 005" />
+                <Input value={formData.nip} onChange={(e) => setFormData({ ...formData, nip: e.target.value })} placeholder="e.g., 005" disabled={!!editDialog.employee} />
               </div>
               <div className="space-y-2">
                 <Label>Nama *</Label>
-                <Input value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value })} placeholder="Nama pegawai" />
+                <Input value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value.toUpperCase() })} placeholder="Nama pegawai" />
               </div>
               <div className="space-y-2">
                 <Label>Divisi *</Label>
@@ -350,11 +350,11 @@ export default function MasterEmployee() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Kode Pegawai</Label>
-              <Input value={formData.nip} onChange={(e) => setFormData({ ...formData, nip: e.target.value })} placeholder="e.g., 005" />
+              <Input value={formData.nip} onChange={(e) => setFormData({ ...formData, nip: e.target.value })} placeholder="e.g., 005" disabled={!!editDialog.employee} />
             </div>
             <div className="space-y-2">
               <Label>Nama *</Label>
-              <Input value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value })} placeholder="Nama pegawai" />
+              <Input value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value.toUpperCase() })} placeholder="Nama pegawai" />
             </div>
             <div className="space-y-2">
               <Label>Divisi *</Label>

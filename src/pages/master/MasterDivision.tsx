@@ -149,7 +149,7 @@ export default function MasterDivision() {
   };
 
   const openEditDialog = (division: Division) => {
-    setFormData({ kode: division.kode, nama: division.nama });
+    setFormData({ kode: division.kode, nama: division.nama.toUpperCase() });
     setEditDialog({ open: true, division });
   };
 
@@ -211,11 +211,11 @@ export default function MasterDivision() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Kode Divisi *</Label>
-                <Input value={formData.kode} onChange={(e) => setFormData({ ...formData, kode: e.target.value })} placeholder="mis., IT" />
+                <Input value={formData.kode} onChange={(e) => setFormData({ ...formData, kode: e.target.value })} placeholder="mis., IT" disabled={!!editDialog.division} />
               </div>
               <div className="space-y-2">
                 <Label>Nama Divisi *</Label>
-                <Input value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value })} placeholder="mis., Divisi IT" />
+                <Input value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value.toUpperCase() })} placeholder="mis., Divisi IT" />
               </div>
             </div>
             <DialogFooter>
@@ -264,11 +264,11 @@ export default function MasterDivision() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Kode Divisi *</Label>
-              <Input value={formData.kode} onChange={(e) => setFormData({ ...formData, kode: e.target.value })} placeholder="mis., IT" />
+              <Input value={formData.kode} onChange={(e) => setFormData({ ...formData, kode: e.target.value })} placeholder="mis., IT" disabled={!!editDialog.division} />
             </div>
             <div className="space-y-2">
               <Label>Nama Divisi *</Label>
-              <Input value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value })} placeholder="mis., Divisi IT" />
+              <Input value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value.toUpperCase() })} placeholder="mis., Divisi IT" />
             </div>
           </div>
           <DialogFooter>
