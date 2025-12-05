@@ -64,6 +64,7 @@ export default function Tasks() {
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; taskId: string | null }>({ open: false, taskId: null });
   const [takeDialog, setTakeDialog] = useState<{ open: boolean; taskId: string | null }>({ open: false, taskId: null });
   const [finishDialog, setFinishDialog] = useState<{ open: boolean; taskId: string | null }>({ open: false, taskId: null });
+  const [descDialog, setDescDialog] = useState<{ open: boolean; title: string; content: string }>({ open: false, title: '', content: '' });
   
   // Form state
   const [formData, setFormData] = useState({
@@ -291,7 +292,13 @@ export default function Tasks() {
     {
       accessorKey: 'deskripsi',
       header: 'Description',
-      cell: ({ row }) => <span className="max-w-xs truncate block">{row.original.deskripsi}</span>,
+      cell: ({ row }) => (
+        <div className="flex items-center">
+          <Button variant="ghost" size="sm" onClick={() => setDescDialog({ open: true, title: `Task ${row.original.kode_pekerjaan}`, content: row.original.deskripsi })}>
+            Lihat detail
+          </Button>
+        </div>
+      ),
     },
     {
       accessorKey: 'division',
@@ -527,6 +534,21 @@ export default function Tasks() {
         onConfirm={handleFinishTask}
         isLoading={isSubmitting}
       />
+
+      {/* Description Dialog */}
+      <Dialog open={descDialog.open} onOpenChange={(open) => setDescDialog((prev) => ({ ...prev, open }))}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{descDialog.title || 'Detail Deskripsi'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <p className="text-sm whitespace-pre-wrap break-words text-foreground">{descDialog.content}</p>
+          </div>
+          <DialogFooter>
+            <Button variant="brand" className="rounded-full" onClick={() => setDescDialog({ open: false, title: '', content: '' })}>Tutup</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
