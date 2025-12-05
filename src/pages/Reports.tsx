@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { reportApi, divisionApi } from '@/services/api';
+import { formatStatus } from '@/lib/utils';
 
 interface ReportItem {
   id: string;
@@ -209,7 +210,7 @@ export default function Reports() {
       d.deskripsi,
       d.division,
       d.picName || '-',
-      d.status,
+      formatStatus(d.status),
       String(d.poin ?? 0),
       safeFormatDate(dateFieldType === 'tanggal_selesai' ? d.tanggal_selesai : d.tanggal_input),
     ]);
@@ -551,7 +552,7 @@ export default function Reports() {
         </div>
         <div className="p-6 bg-card rounded-2xl border border-border text-center">
           <p className="text-4xl font-bold text-success">{summary.done}</p>
-          <p className="text-sm text-muted-foreground mt-1">Completed</p>
+          <p className="text-sm text-muted-foreground mt-1">Done</p>
         </div>
       </div>
 

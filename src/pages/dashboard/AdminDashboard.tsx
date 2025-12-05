@@ -16,7 +16,7 @@ import {
 import { dashboardApi } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 
-const COLORS = ['hsl(217, 91%, 60%)', 'hsl(142, 76%, 36%)', 'hsl(38, 92%, 50%)', 'hsl(0, 84%, 60%)'];
+const COLORS = ['hsl(38, 92%, 50%)', 'hsl(217, 91%, 60%)', 'hsl(142, 76%, 36%)', 'hsl(0, 84%, 60%)'];
 
 interface DashboardData {
   stats: {
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
 
   const pieData = data ? [
     { name: 'Open', value: data.stats.totalOpen },
-    { name: 'On Progress', value: data.stats.totalOnProgress },
+    { name: 'In Progress', value: data.stats.totalOnProgress },
     { name: 'Done', value: data.stats.totalDone },
   ] : [];
 
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
           iconClassName="bg-primary"
         />
         <StatCard
-          title="Completed"
+          title="Done"
           value={data?.stats.totalDone || 0}
           icon={CheckCircle2}
           iconClassName="bg-success"
@@ -222,7 +222,7 @@ export default function AdminDashboard() {
                     }}>
                       <div className="font-semibold">{label}</div>
                       {hoverKey === 'onProgress' && (
-                        <div className="text-primary">On Progress : {entry.value ?? 0}</div>
+                        <div className="text-primary">In Progress : {entry.value ?? 0}</div>
                       )}
                       {hoverKey === 'done' && (
                         <div className="text-success">Done : {entry.value ?? 0}</div>
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
                 dataKey="onProgress"
                 stackId="a"
                 fill="hsl(217, 91%, 60%)"
-                name="On Progress"
+                name="In Progress"
                 radius={[0, 0, 4, 4]}
                 barSize={44}
                 onMouseOver={() => { setIsHoveringBar(true); setHoverKey('onProgress'); }}

@@ -201,7 +201,7 @@ export default function EmployeeDashboard() {
           iconClassName="bg-warning"
         />
         <StatCard
-          title="Completed"
+          title="Done"
           value={data?.stats.completed || 0}
           icon={CheckCircle2}
           iconClassName="bg-success"

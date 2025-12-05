@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { formatStatus } from '@/lib/utils';
 
 type TaskStatus = 'OPEN' | 'ON PROGRESS' | 'DONE';
 
@@ -22,7 +23,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         className
       )}
     >
-      {status}
+      {formatStatus(status)}
     </span>
   );
 }
