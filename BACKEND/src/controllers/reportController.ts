@@ -8,7 +8,7 @@ export const getReport = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { divisi, division, start, end, filter: filterMode } = req.query as Record<string, string>;
+    const { divisi, division, start, end, filter: filterMode, dateField = 'tanggal_input' } = req.query as Record<string, string>;
 
     const queryFilter: any = {};
 
@@ -17,18 +17,26 @@ export const getReport = async (
       queryFilter.kode_divisi = divisionCode;
     }
 
+    // Use the selected date field for filtering
+    const dateFieldToUse = dateField === 'tanggal_selesai' ? 'tanggal_selesai' : 'tanggal_input';
+    
+    // If filtering by tanggal_selesai, only include completed tasks
+    if (dateField === 'tanggal_selesai') {
+      queryFilter.status_pekerjaan = 'DONE';
+    }
+    
     if (start || end) {
-      queryFilter.tanggal_input = {};
+      queryFilter[dateFieldToUse] = {};
       if (start) {
-        queryFilter.tanggal_input.$gte = start;
+        queryFilter[dateFieldToUse].$gte = start;
       }
       if (end) {
-        queryFilter.tanggal_input.$lte = end;
+        queryFilter[dateFieldToUse].$lte = end;
       }
     }
 
     const [tasks, divisions] = await Promise.all([
-      Task.find(queryFilter).sort({ tanggal_input: -1 }),
+      Task.find(queryFilter).sort({ [dateFieldToUse]: -1 }),
       Division.find({}),
     ]);
 
@@ -46,6 +54,7 @@ export const getReport = async (
       pic: typeof task.pic === 'string' ? task.pic : null,
       status_pekerjaan: task.status_pekerjaan,
       tanggal_input: task.tanggal_input,
+      tanggal_selesai: task.tanggal_selesai,
       deadline: task.deadline,
     }));
 

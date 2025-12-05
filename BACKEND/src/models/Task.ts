@@ -38,6 +38,10 @@ const taskSchema = new Schema<ITask>(
       type: String,
       default: () => new Date().toISOString().split('T')[0], // YYYY-MM-DD format
     },
+    tanggal_selesai: {
+      type: String,
+      default: null, // YYYY-MM-DD format when task is completed
+    },
     deadline: {
       type: Date,
       required: true,

@@ -99,6 +99,10 @@ export const updateTask = async (
         return;
       }
       updateData.status_pekerjaan = nextStatus;
+      // Set tanggal_selesai when status changes to DONE
+      if (nextStatus === 'DONE') {
+        updateData.tanggal_selesai = new Date().toISOString().split('T')[0];
+      }
     }
 
     const task = await Task.findByIdAndUpdate(id, updateData, {
@@ -243,6 +247,7 @@ export const finishTask = async (
     }
 
     task.status_pekerjaan = 'DONE';
+    task.tanggal_selesai = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     await task.save();
 
     const populatedTask = await Task.findById(task._id);

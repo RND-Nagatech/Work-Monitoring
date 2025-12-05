@@ -35,6 +35,7 @@ interface ReportItem {
   poin: number;
   deadline: string;
   tanggal_input: string;
+  tanggal_selesai: string | null;
 }
 
 export default function Reports() {
@@ -43,6 +44,7 @@ export default function Reports() {
   const [divisionFilter, setDivisionFilter] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [dateFieldType, setDateFieldType] = useState<'tanggal_input' | 'tanggal_selesai'>('tanggal_input');
   const [isLoading, setIsLoading] = useState(true);
   type FilterKind = 'none' | 'top_points' | 'top_tasks';
   const [filterType, setFilterType] = useState<FilterKind>('none');
@@ -125,6 +127,7 @@ export default function Reports() {
           poin: item.poin ?? 0,
           deadline: item.deadline,
           tanggal_input: item.createdAt || item.tanggal_input || item.created || '',
+          tanggal_selesai: item.tanggal_selesai || null,
         };
       });
 
@@ -147,12 +150,17 @@ export default function Reports() {
     setEndDate(value);
   };
 
+  const handleDateFieldTypeChange = (value: 'tanggal_input' | 'tanggal_selesai') => {
+    setDateFieldType(value);
+  };
+
   const handleSearch = async () => {
-    const filters: { division?: string; start?: string; end?: string; filter?: Exclude<FilterKind, 'none'> } = {};
+    const filters: { division?: string; start?: string; end?: string; filter?: Exclude<FilterKind, 'none'>; dateField?: 'tanggal_input' | 'tanggal_selesai' } = {};
     if (divisionFilter && divisionFilter !== 'all') filters.division = divisionFilter;
     if (startDate) filters.start = startDate;
     if (endDate) filters.end = endDate;
     if (filterType !== 'none') filters.filter = filterType;
+    if (dateFieldType !== 'tanggal_input') filters.dateField = dateFieldType;
     await fetchReportData(filters);
   };
 
@@ -203,7 +211,7 @@ export default function Reports() {
       d.picName || '-',
       d.status,
       String(d.poin ?? 0),
-      safeFormatDate(d.tanggal_input),
+      safeFormatDate(dateFieldType === 'tanggal_selesai' ? d.tanggal_selesai : d.tanggal_input),
     ]);
   };
 
@@ -245,7 +253,7 @@ export default function Reports() {
         'PIC',
         'Status',
         'Points',
-        'Created',
+        dateFieldType === 'tanggal_selesai' ? 'Completed' : 'Created',
       ]]
       : [[
         'Employee',
@@ -318,7 +326,7 @@ export default function Reports() {
     const filtersLine = appliedFilters.length ? appliedFilters.join(' | ') : 'No additional filters';
 
     const header = filterType === 'none'
-      ? ['Code', 'Description', 'Division', 'PIC', 'Status', 'Points', 'Created']
+      ? ['Code', 'Description', 'Division', 'PIC', 'Status', 'Points', dateFieldType === 'tanggal_selesai' ? 'Completed' : 'Created']
       : ['Employee', filterType === 'top_points' ? 'Points' : 'Tasks'];
     const aoa: any[][] = [[title], [generated], [filtersLine], header, ...buildRows()];
 
@@ -491,6 +499,34 @@ export default function Reports() {
           </div>
         </div>
 
+        <div className="mt-4">
+          <label className="text-sm font-medium text-foreground block mb-2">Date Filter Type</label>
+          <div className="flex items-center gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="dateField"
+                value="tanggal_input"
+                checked={dateFieldType === 'tanggal_input'}
+                onChange={(e) => handleDateFieldTypeChange(e.target.value as 'tanggal_input' | 'tanggal_selesai')}
+                className="w-4 h-4 text-primary"
+              />
+              <span className="text-sm">Tanggal Input</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="dateField"
+                value="tanggal_selesai"
+                checked={dateFieldType === 'tanggal_selesai'}
+                onChange={(e) => handleDateFieldTypeChange(e.target.value as 'tanggal_input' | 'tanggal_selesai')}
+                className="w-4 h-4 text-primary"
+              />
+              <span className="text-sm">Tanggal Selesai</span>
+            </label>
+          </div>
+        </div>
+
         <div className="flex justify-end mt-4">
           <Button variant="brand" className="rounded-full" onClick={handleSearch}>
             <FileText className="w-4 h-4 mr-2" />
@@ -541,7 +577,7 @@ export default function Reports() {
                   <TableHead className="text-muted-foreground font-medium">PIC</TableHead>
                   <TableHead className="text-muted-foreground font-medium">Status</TableHead>
                   <TableHead className="text-muted-foreground font-medium">Points</TableHead>
-                  <TableHead className="text-muted-foreground font-medium">Created</TableHead>
+                  <TableHead className="text-muted-foreground font-medium">{dateFieldType === 'tanggal_selesai' ? 'Completed' : 'Created'}</TableHead>
                 </TableRow>
               ) : (
                 <TableRow className="border-b border-border hover:bg-transparent">
@@ -561,7 +597,7 @@ export default function Reports() {
                       <TableCell className="text-foreground">{item.picName || '-'}</TableCell>
                       <TableCell><StatusBadge status={item.status} /></TableCell>
                       <TableCell className="text-foreground text-center">{item.poin}</TableCell>
-                      <TableCell className="text-foreground">{safeFormatDate(item.tanggal_input)}</TableCell>
+                      <TableCell className="text-foreground">{safeFormatDate(dateFieldType === 'tanggal_selesai' ? item.tanggal_selesai : item.tanggal_input)}</TableCell>
                     </TableRow>
                   ))}
                   {filteredData.length === 0 && (
