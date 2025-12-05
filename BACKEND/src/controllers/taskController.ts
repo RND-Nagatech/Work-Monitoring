@@ -9,7 +9,7 @@ export const getAllTasks = async (
   res: Response
 ): Promise<void> => {
   try {
-    const tasks = await Task.find()
+    const tasks = await Task.find({ status_pekerjaan: { $ne: 'DONE' } })
       .sort({ createdAt: -1 });
     successResponse(res, 'Tasks retrieved successfully', tasks);
   } catch (error: any) {
@@ -158,7 +158,12 @@ export const getAvailableTasks = async (
     }
 
     const tasks = await Task.find({
-      $or: [{ pic: null }, { pic: employee.nama_pegawai }],
+      $and: [
+        { status_pekerjaan: { $ne: 'DONE' } },
+        {
+          $or: [{ pic: null }, { pic: employee.nama_pegawai }],
+        }
+      ]
     }).sort({ createdAt: -1 });
 
     successResponse(res, 'Available tasks retrieved successfully', tasks);

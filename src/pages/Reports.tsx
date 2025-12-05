@@ -43,13 +43,21 @@ export default function Reports() {
   const [data, setData] = useState<ReportItem[]>([]);
   const [divisions, setDivisions] = useState<any[]>([]);
   const [divisionFilter, setDivisionFilter] = useState<string>('all');
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [startDate, setStartDate] = useState<string>(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState<string>(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
   const [dateFieldType, setDateFieldType] = useState<'tanggal_input' | 'tanggal_selesai'>('tanggal_input');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   type FilterKind = 'none' | 'top_points' | 'top_tasks';
   const [filterType, setFilterType] = useState<FilterKind>('none');
   const [serverRanking, setServerRanking] = useState<Array<{ name: string; value: number }> | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,13 +66,12 @@ export default function Reports() {
         const divisionsResponse = await divisionApi.getAll();
         setDivisions(divisionsResponse.data.divisions || divisionsResponse.data);
 
-        // Fetch initial report data
-        await fetchReportData();
+        // No initial data fetch - table will be empty until user applies filters
       } catch (error) {
         console.error('Failed to fetch data:', error);
         toast({
           title: 'Error',
-          description: 'Failed to load report data. Please check your connection.',
+          description: 'Failed to load divisions data. Please check your connection.',
           variant: 'destructive',
         });
         setData([]);
@@ -84,7 +91,7 @@ export default function Reports() {
     return format(d, 'dd MMM yyyy');
   };
 
-  const fetchReportData = async (filters?: { division?: string; start?: string; end?: string; filter?: Exclude<FilterKind, 'none'> }) => {
+  const fetchReportData = async (filters?: { division?: string; status?: string; start?: string; end?: string; filter?: Exclude<FilterKind, 'none'> }) => {
     try {
       const response = await reportApi.getReport(filters);
       const payload = response.data;
@@ -156,13 +163,17 @@ export default function Reports() {
   };
 
   const handleSearch = async () => {
-    const filters: { division?: string; start?: string; end?: string; filter?: Exclude<FilterKind, 'none'>; dateField?: 'tanggal_input' | 'tanggal_selesai' } = {};
+    setIsLoading(true);
+    const filters: { division?: string; status?: string; start?: string; end?: string; filter?: Exclude<FilterKind, 'none'>; dateField?: 'tanggal_input' | 'tanggal_selesai' } = {};
     if (divisionFilter && divisionFilter !== 'all') filters.division = divisionFilter;
+    if (statusFilter && statusFilter !== 'all') filters.status = statusFilter;
     if (startDate) filters.start = startDate;
     if (endDate) filters.end = endDate;
     if (filterType !== 'none') filters.filter = filterType;
     if (dateFieldType !== 'tanggal_input') filters.dateField = dateFieldType;
     await fetchReportData(filters);
+    setHasSearched(true);
+    setIsLoading(false);
   };
 
   // Ranking datasets for special filters
@@ -451,7 +462,7 @@ export default function Reports() {
           <span className="font-semibold text-foreground">Report Filters</span>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Division</label>
             <Select value={divisionFilter} onValueChange={handleDivisionChange}>
@@ -463,6 +474,21 @@ export default function Reports() {
                 {divisions.map((d) => (
                   <SelectItem key={d._id || d.id || d.kode_divisi} value={d.kode_divisi || d.kode}>{d.nama_divisi || d.nama}</SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Status</label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="OPEN">Open</SelectItem>
+                <SelectItem value="ON PROGRESS">In Progress</SelectItem>
+                <SelectItem value="DONE">Done</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -486,13 +512,13 @@ export default function Reports() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Filter</label>
+            <label className="text-sm font-medium text-foreground">Type Laporan</label>
             <Select value={filterType} onValueChange={(v) => setFilterType(v as FilterKind)}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Pilih filter" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Tidak Ada</SelectItem>
+                <SelectItem value="none">Task Detail</SelectItem>
                 <SelectItem value="top_points">Poin Terbanyak</SelectItem>
                 <SelectItem value="top_tasks">Task Terbanyak</SelectItem>
               </SelectContent>
@@ -536,27 +562,39 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-6 bg-card rounded-2xl border border-border text-center">
-          <p className="text-4xl font-bold text-foreground">{summary.total}</p>
-          <p className="text-sm text-muted-foreground mt-1">Total Tasks</p>
+      {/* Placeholder message when no search has been performed */}
+      {!hasSearched && (
+        <div className="p-12 bg-card rounded-2xl border border-border text-center">
+          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">Belum Ada Data Laporan</h3>
+          <p className="text-muted-foreground">Silakan atur filter di atas dan klik "Cari Data" untuk menampilkan laporan.</p>
         </div>
-        <div className="p-6 bg-card rounded-2xl border border-border text-center">
-          <p className="text-4xl font-bold text-foreground">{summary.open}</p>
-          <p className="text-sm text-muted-foreground mt-1">Open</p>
-        </div>
-        <div className="p-6 bg-card rounded-2xl border border-border text-center">
-          <p className="text-4xl font-bold text-primary">{summary.onProgress}</p>
-          <p className="text-sm text-muted-foreground mt-1">In Progress</p>
-        </div>
-        <div className="p-6 bg-card rounded-2xl border border-border text-center">
-          <p className="text-4xl font-bold text-success">{summary.done}</p>
-          <p className="text-sm text-muted-foreground mt-1">Done</p>
-        </div>
-      </div>
+      )}
 
-      {/* Results Table */}
+      {/* Summary Cards - Only show after search */}
+      {hasSearched && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="p-6 bg-card rounded-2xl border border-border text-center">
+            <p className="text-4xl font-bold text-foreground">{summary.total}</p>
+            <p className="text-sm text-muted-foreground mt-1">Total Tasks</p>
+          </div>
+          <div className="p-6 bg-card rounded-2xl border border-border text-center">
+            <p className="text-4xl font-bold text-foreground">{summary.open}</p>
+            <p className="text-sm text-muted-foreground mt-1">Open</p>
+          </div>
+          <div className="p-6 bg-card rounded-2xl border border-border text-center">
+            <p className="text-4xl font-bold text-primary">{summary.onProgress}</p>
+            <p className="text-sm text-muted-foreground mt-1">In Progress</p>
+          </div>
+          <div className="p-6 bg-card rounded-2xl border border-border text-center">
+            <p className="text-4xl font-bold text-success">{summary.done}</p>
+            <p className="text-sm text-muted-foreground mt-1">Done</p>
+          </div>
+        </div>
+      )}
+
+      {/* Results Table - Only show after search */}
+      {hasSearched && (
       <div className="p-6 bg-card rounded-2xl border border-border">
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-foreground">
@@ -630,6 +668,7 @@ export default function Reports() {
           </Table>
         </div>
       </div>
+      )}
     </div>
   );
 }

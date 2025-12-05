@@ -8,13 +8,17 @@ export const getReport = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { divisi, division, start, end, filter: filterMode, dateField = 'tanggal_input' } = req.query as Record<string, string>;
+    const { divisi, division, status, start, end, filter: filterMode, dateField = 'tanggal_input' } = req.query as Record<string, string>;
 
     const queryFilter: any = {};
 
     const divisionCode = division ?? divisi;
     if (divisionCode) {
       queryFilter.kode_divisi = divisionCode;
+    }
+
+    if (status) {
+      queryFilter.status_pekerjaan = status;
     }
 
     // Use the selected date field for filtering
